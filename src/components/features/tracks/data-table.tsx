@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   OnChangeFn,
   PaginationState,
+  SortingState,
   useReactTable,
 } from '@tanstack/react-table';
 
@@ -15,15 +16,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { MetaDataI } from '@/schemas/dto.types';
+import { MetaDataI } from '@/types/types';
 import { DataTablePagination } from './pagination';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   metaData: MetaDataI;
-  onPaginationChange: OnChangeFn<PaginationState>;
   pagination: PaginationState;
+  onPaginationChange: OnChangeFn<PaginationState>;
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
 }
 
 export function DataTable<TData, TValue>({
@@ -32,15 +35,19 @@ export function DataTable<TData, TValue>({
   metaData,
   pagination,
   onPaginationChange,
+  sorting,
+  onSortingChange,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
+    manualSorting: true,
     rowCount: metaData.total,
+    state: { pagination, sorting },
     onPaginationChange,
-    state: { pagination },
+    onSortingChange,
   });
 
   return (
