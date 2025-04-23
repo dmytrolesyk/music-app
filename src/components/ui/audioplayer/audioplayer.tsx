@@ -30,12 +30,14 @@ const createGradients = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2
 
 export function AudioPlayer() {
   const wsRef = useRef<WaveSurfer | null>(null);
+
+  const waveformRef = useRef<HTMLDivElement>(null);
   const timeRef = useRef<HTMLDivElement>(null);
   const durationRef = useRef<HTMLDivElement>(null);
   const hoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!wsRef.current) {
+    if (!wsRef.current && waveformRef.current) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
@@ -43,7 +45,7 @@ export function AudioPlayer() {
         const [gradient, progressGradient] = createGradients(canvas, ctx);
 
         wsRef.current = WaveSurfer.create({
-          container: '#waveform',
+          container: waveformRef.current,
           waveColor: gradient,
           progressColor: progressGradient,
           barWidth: 2,
@@ -75,7 +77,8 @@ export function AudioPlayer() {
           hoverRef.current.style.width = `${e.nativeEvent.offsetX}px`;
         }
       }}
-      id="waveform"
+      // id="waveform"
+      ref={waveformRef}
       className="group relative cursor-pointer"
     >
       <span

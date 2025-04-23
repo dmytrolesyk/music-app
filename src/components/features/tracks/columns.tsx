@@ -1,8 +1,8 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { AudioPlayer } from '@/components/ui/audioplayer/audioplayer';
-import { TrackDto } from '@/schemas/dto.types';
+import { TrackI } from '@/schemas/dto.types';
 
-export const columns: ColumnDef<TrackDto>[] = [
+export const columns: ColumnDef<TrackI>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {

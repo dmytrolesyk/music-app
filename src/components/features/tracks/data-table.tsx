@@ -1,4 +1,11 @@
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  OnChangeFn,
+  PaginationState,
+  useReactTable,
+} from '@tanstack/react-table';
 
 import {
   Table,
@@ -8,17 +15,32 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { MetaDataI } from '@/schemas/dto.types';
+import { DataTablePagination } from './pagination';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  metaData: MetaDataI;
+  onPaginationChange: OnChangeFn<PaginationState>;
+  pagination: PaginationState;
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+  metaData,
+  pagination,
+  onPaginationChange,
+}: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    rowCount: metaData.total,
+    onPaginationChange,
+    state: { pagination },
   });
 
   return (
@@ -59,6 +81,9 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           )}
         </TableBody>
       </Table>
+      <div className="py-4">
+        <DataTablePagination table={table} />
+      </div>
     </div>
   );
 }

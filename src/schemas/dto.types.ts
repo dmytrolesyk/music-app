@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { TrackSchema, TracksResponseSchema } from './dto.schemas';
+import { MetadataSchema, TrackSchema, TracksResponseSchema } from './dto.schemas';
 
-export type TrackDto = z.infer<typeof TrackSchema>;
-export type TracksDto = z.infer<typeof TracksResponseSchema>;
+export type TrackI = z.infer<typeof TrackSchema>;
+export type TracksI = z.infer<typeof TracksResponseSchema>;
+export type MetaDataI = z.infer<typeof MetadataSchema>;
