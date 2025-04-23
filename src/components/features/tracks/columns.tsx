@@ -3,6 +3,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { AudioPlayer } from '@/components/ui/audioplayer/audioplayer';
 import { Button } from '@/components/ui/button';
 import { TrackI } from '@/types/types';
+import { Input } from '@/components/ui/input';
 
 const SortingButton = ({
   title,
@@ -18,40 +19,67 @@ const SortingButton = ({
 );
 
 export const columns: ColumnDef<TrackI>[] = [
-  // {
-  //   id: 'actions',
-  //   cell: ({ row }) => {
-  //     return <div>actions</div>;
-  //   },
-  // },
   {
     id: 'title',
     accessorKey: 'title',
     header: ({ column }) => {
-      return <SortingButton title="Title" onClick={column.getToggleSortingHandler()} />;
+      return (
+        <div className="flex-col">
+          <SortingButton title="Title" onClick={column.getToggleSortingHandler()} />
+          <div className="my-2">
+            <Input
+              placeholder="Filter titles..."
+              value={(column.getFilterValue() as string) ?? ''}
+              onChange={event => column.setFilterValue(event.target.value)}
+              className="max-w-sm"
+            />
+          </div>
+        </div>
+      );
     },
   },
   {
     id: 'artist',
     accessorKey: 'artist',
     header: ({ column }) => {
-      return <SortingButton title="Artist" onClick={column.getToggleSortingHandler()} />;
+      return (
+        <div>
+          <SortingButton title="Artist" onClick={column.getToggleSortingHandler()} />
+          <div className="my-2">
+            <Input
+              placeholder="Filter artists..."
+              value={(column.getFilterValue() as string) ?? ''}
+              onChange={event => column.setFilterValue(event.target.value)}
+              className="max-w-sm"
+            />
+          </div>
+        </div>
+      );
     },
   },
   {
     id: 'album',
     accessorKey: 'album',
     header: ({ column }) => {
-      return <SortingButton title="Album" onClick={column.getToggleSortingHandler()} />;
+      return (
+        <div>
+          <SortingButton title="Album" onClick={column.getToggleSortingHandler()} />
+          <div className="my-2">
+            <Input
+              placeholder="Filter albums..."
+              value={(column.getFilterValue() as string) ?? ''}
+              onChange={event => column.setFilterValue(event.target.value)}
+              className="max-w-sm"
+            />
+          </div>
+        </div>
+      );
     },
   },
   {
     id: 'genres',
     accessorKey: 'genres',
     header: 'Genres',
-    // header: ({ column }) => {
-    //   return <SortingButton title="Genres" onClick={column.getToggleSortingHandler()} />;
-    // },
   },
   {
     id: 'coverImage',

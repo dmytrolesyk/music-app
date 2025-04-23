@@ -10,14 +10,15 @@ export const getTracks = (params?: {
   limit: number;
   sort?: string;
   order?: SortingOrder;
+  search?: string;
 }) => {
-  const { page = 0, limit = 10, sort, order } = params ?? {};
+  const { page = 0, limit = 10, sort, order, search } = params ?? {};
 
   return queryOptions({
-    queryKey: ['GET_TRACKS', page, limit, sort, order],
+    queryKey: ['GET_TRACKS', page, limit, sort, order, search],
     queryFn: async () => {
       const searchParams = new URLSearchParams(
-        removeNullishValues({ page: String(page), limit: String(limit), sort, order }),
+        removeNullishValues({ page: String(page), limit: String(limit), sort, order, search }),
       );
 
       const response: TracksI = await getData(apiClient.get(`/tracks?${searchParams.toString()}`));

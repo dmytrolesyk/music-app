@@ -11,28 +11,30 @@ type SearchParamsType = {
   size: number;
   sort?: string;
   order?: SortingOrder;
+  q?: string;
 };
 
 export const Route = createFileRoute('/tracks')({
   component: TracksTablePage,
   pendingComponent: () => <div>Loading...</div>,
   validateSearch: search => {
-    const { page = 1, size = 10, sort, order } = search;
+    const { page = 1, size = 10, sort, order, q } = search;
     return {
       page,
       size,
       sort,
       order,
+      q,
     } as SearchParamsType;
   },
   loaderDeps: ({ search }) => search,
-  loader: ({ context: { queryClient }, deps: { page, size, sort, order } }) => {
-    return queryClient.ensureQueryData(getTracks({ page, limit: size, sort, order }));
+  loader: ({ context: { queryClient }, deps: { page, size, sort, order, q } }) => {
+    return queryClient.ensureQueryData(getTracks({ page, limit: size, sort, order, search: q }));
   },
 });
 
 const useQueryParamsTableState = () => {
-  const { page, size, sort, order } = Route.useSearch();
+  const { page, size, sort, order, q } = Route.useSearch();
   const routeApi = getRouteApi('/tracks');
   const navigate = routeApi.useNavigate();
 
@@ -61,15 +63,23 @@ const useQueryParamsTableState = () => {
     });
   };
 
+  const updateSearch = (searchString: string) => {
+    navigate({
+      search: prev => ({ ...prev, q: searchString }),
+    });
+  };
+
   return {
     page,
     size,
     sort,
     order,
+    search: q,
     paginationState,
     updatePagination,
     sortingState,
     updateSorting,
+    updateSearch,
   };
 };
 
@@ -79,13 +89,15 @@ function TracksTablePage() {
     size,
     sort,
     order,
+    search,
     paginationState,
     updatePagination,
     sortingState,
     updateSorting,
+    updateSearch,
   } = useQueryParamsTableState();
 
-  const result = useSuspenseQuery(getTracks({ page, limit: size, sort, order }));
+  const result = useSuspenseQuery(getTracks({ page, limit: size, sort, order, search }));
 
   const {
     data: { data, meta },
@@ -106,6 +118,8 @@ function TracksTablePage() {
             typeof updaterOrValue === 'function' ? updaterOrValue(sortingState) : updaterOrValue;
           updateSorting(newSortingState);
         }}
+        onSearch={updateSearch}
+        searchString={search}
         columns={columns}
         data={data}
         metaData={meta}
