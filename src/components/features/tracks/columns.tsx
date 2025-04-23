@@ -10,34 +10,40 @@ export const columns: ColumnDef<TrackI>[] = [
     },
   },
   {
+    id: 'title',
     accessorKey: 'title',
     header: 'Title',
   },
   {
+    id: 'artist',
     accessorKey: 'artist',
     header: 'Artist',
   },
   {
+    id: 'album',
     accessorKey: 'album',
     header: 'Album',
   },
   {
+    id: 'genres',
     accessorKey: 'genres',
     header: 'Genres',
   },
   {
+    id: 'coverImage',
     accessorKey: 'coverImage',
     header: 'Cover Image',
     cell: ({ row }) => {
-      const imageUrl = row.getValue<string>('coverImage');
+      const imageUrl = row.original.coverImage;
       return imageUrl ? <img width={150} height={150} src={imageUrl} /> : null;
     },
   },
   {
+    id: 'audiofile',
     accessorKey: 'audioFile',
     header: 'Audio',
     cell: ({ row }) => {
-      const audioFile = row.getValue<string>('audioFile');
+      const audioFile = row.original.audioFile;
       return audioFile ? (
         <div className="w-[420px]">
           <AudioPlayer />
