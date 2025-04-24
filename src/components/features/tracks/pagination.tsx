@@ -16,7 +16,7 @@ interface DataTablePaginationProps<TData> {
 
 export function DataTablePagination<TData>({ table }: DataTablePaginationProps<TData>) {
   return (
-    <div className="flex items-center justify-between px-2">
+    <div data-testid="pagination" className="flex items-center justify-between px-2">
       <div className="flex-1 text-sm text-muted-foreground">
         {table.getFilteredSelectedRowModel().rows.length} of{' '}
         {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -60,6 +60,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
             className="h-8 w-8 p-0"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            data-testid="pagination-prev"
           >
             <span className="sr-only">Go to previous page</span>
             <ChevronLeft />
@@ -69,6 +70,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
             className="h-8 w-8 p-0"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            data-testid="pagination-next"
           >
             <span className="sr-only">Go to next page</span>
             <ChevronRight />

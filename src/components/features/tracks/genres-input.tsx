@@ -34,7 +34,7 @@ export const GenresTagInput: React.FC<GenresTagInputProps> = ({ genres, value, o
   };
 
   return (
-    <div className="space-y-4">
+    <div data-test-id="genre-selector" className="space-y-4">
       <div className="flex flex-wrap gap-2">
         {value.map(genre => (
           <Badge key={genre} className="py-1 px-2 flex items-center gap-1">

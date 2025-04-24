@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -33,12 +34,20 @@ export function UploadFileDialog({
   const { mutate: upload, isPending: isUploading } = useUploadFile({
     onSuccess: () => {
       onFormSubmit();
+      toast.success(<p data-testid="toast-success">File was successfully uploaded</p>);
+    },
+    onError: ({ message }: { message: string }) => {
+      toast.error(<p data-testid="toast-error">{message}</p>);
     },
   });
 
   const { mutate: remove, isPending: isRemoving } = useRemoveFile({
     onSuccess: () => {
       onFormSubmit();
+      toast.success(<p data-testid="toast-success">File was successfully removed</p>);
+    },
+    onError: ({ message }: { message: string }) => {
+      toast.error(<p data-testid="toast-error">{message}</p>);
     },
   });
 
@@ -90,7 +99,7 @@ export function UploadFileDialog({
           </dl>
           {trackToEdit?.audioFile ? (
             <div className="py-4">
-              <AudioPlayer fileName={trackToEdit.audioFile} />
+              <AudioPlayer trackId={trackToEdit.id} fileName={trackToEdit.audioFile} />
             </div>
           ) : (
             <AudioFileUploadInput onChange={f => setFile(f)} />

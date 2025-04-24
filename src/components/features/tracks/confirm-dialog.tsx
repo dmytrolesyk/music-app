@@ -19,17 +19,22 @@ type ConfirmDialogProps = {
 
 export function ConfirmDialog({ open, setOpen, message, onConfirm }: ConfirmDialogProps) {
   return (
-    <AlertDialog open={open}>
+    <AlertDialog data-testid="confirm-dialog" open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>{message}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="cursor-pointer" onClick={() => setOpen(false)}>
+          <AlertDialogCancel
+            data-testid="cancel-delete"
+            className="cursor-pointer"
+            onClick={() => setOpen(false)}
+          >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
+            data-testid="confirm-delete"
             className="cursor-pointer"
             onClick={() => {
               onConfirm();

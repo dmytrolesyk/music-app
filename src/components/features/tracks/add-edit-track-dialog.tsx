@@ -19,6 +19,7 @@ import { getGenres, useAddTrack, getTrack, useEditTrack } from '@/lib/network/qu
 import { ConfirmDialog } from './confirm-dialog';
 import { TrackSchema } from '@/types/schemas';
 import { GenresTagInput } from './genres-input';
+import { FieldError } from '@/components/ui/field-error';
 
 const TrackFormSchema = TrackSchema.pick({
   title: true,
@@ -47,7 +48,7 @@ type AddEditTrackDialogProps = {
 };
 
 const onError = ({ message }: { message: string }) => {
-  toast.error(message);
+  toast.error(<p data-testid="toast-error">{message}</p>);
 };
 
 export function AddEditTrackDialog({
@@ -66,7 +67,7 @@ export function AddEditTrackDialog({
 
   const { mutate: addTrack, isPending: addTrackPending } = useAddTrack({
     onSuccess: () => {
-      toast.success('Track was successfully added');
+      toast.success(<p data-testid="toast-success">Track was successfully added</p>);
       form.reset(defaultTrack);
       onFormSubmit();
     },
@@ -75,7 +76,7 @@ export function AddEditTrackDialog({
 
   const { mutate: editTrack, isPending: editTrackPending } = useEditTrack({
     onSuccess: () => {
-      toast.success('Track was successfully edited');
+      toast.success(<p data-testid="toast-success">Track was successfully edited</p>);
       form.reset(defaultTrack);
       onFormSubmit();
     },
@@ -122,6 +123,7 @@ export function AddEditTrackDialog({
             </DialogDescription>
           </DialogHeader>
           <form
+            data-testid="track-form"
             onSubmit={e => {
               e.preventDefault();
               e.stopPropagation();
@@ -137,11 +139,22 @@ export function AddEditTrackDialog({
                         Title
                       </Label>
                       <Input
-                        id="name"
+                        id="title"
+                        data-test-id="input-title"
+                        onBlur={field.handleBlur}
                         onChange={e => field.handleChange(e.target.value)}
                         value={field.state.value}
                         className="col-span-3"
                       />
+                      {field.state.meta.isTouched &&
+                        field.state.meta.errors.map((error, i) => (
+                          <FieldError
+                            dataTestId="error-title"
+                            key={i}
+                            className="col-span-4"
+                            error={error?.message}
+                          />
+                        ))}
                     </>
                   )}
                 </form.Field>
@@ -154,11 +167,22 @@ export function AddEditTrackDialog({
                         Artist
                       </Label>
                       <Input
+                        data-test-id="input-artist"
                         onChange={e => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
                         value={field.state.value}
                         id="artist"
                         className="col-span-3"
                       />
+                      {field.state.meta.isTouched &&
+                        field.state.meta.errors.map((error, i) => (
+                          <FieldError
+                            dataTestId="error-artist"
+                            key={i}
+                            className="col-span-4"
+                            error={error?.message}
+                          />
+                        ))}
                     </>
                   )}
                 </form.Field>
@@ -171,6 +195,7 @@ export function AddEditTrackDialog({
                         Album
                       </Label>
                       <Input
+                        data-test-id="input-album"
                         onChange={e => field.handleChange(e.target.value)}
                         value={field.state.value}
                         id="album"
@@ -189,18 +214,29 @@ export function AddEditTrackDialog({
                       </Label>
                       <div className="col-span-3">
                         <Input
+                          data-test-id="input-cover-image"
                           onChange={e => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
                           value={field.state.value}
                           id="coverImage"
                         />
-                        {field.state.value && (
+                        {field.state.value && field.state.meta.errors.length === 0 ? (
                           <img
                             src={field.state.value}
                             alt="Cover preview"
                             className="mt-2 max-h-32 rounded col-span-3"
                           />
-                        )}
+                        ) : null}
                       </div>
+                      {field.state.meta.isTouched &&
+                        field.state.meta.errors.map((error, i) => (
+                          <FieldError
+                            dataTestId="error-title"
+                            key={i}
+                            className="col-span-4"
+                            error={error?.message}
+                          />
+                        ))}
                     </>
                   )}
                 </form.Field>
@@ -225,7 +261,12 @@ export function AddEditTrackDialog({
               </div>
             </div>
             <DialogFooter>
-              <Button aria-disabled={isLoading} disabled={isLoading} type="submit">
+              <Button
+                data-test-id="submit-button"
+                aria-disabled={isLoading}
+                disabled={isLoading}
+                type="submit"
+              >
                 Save changes
               </Button>
             </DialogFooter>

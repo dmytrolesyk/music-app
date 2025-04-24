@@ -13,6 +13,7 @@ import { useMemo, useState } from 'react';
 import { UploadFileDialog } from '@/components/features/tracks/upload-file-dialog';
 import { ConfirmDialog } from '@/components/features/tracks/confirm-dialog';
 import { toast } from 'sonner';
+import { TrackTableSkeleton } from '@/components/features/tracks/tracks-table-skeleton';
 
 type SearchParamsType = {
   page: number;
@@ -24,7 +25,7 @@ type SearchParamsType = {
 
 export const Route = createFileRoute('/tracks')({
   component: TracksTablePage,
-  pendingComponent: () => <div>Loading...</div>,
+  pendingComponent: TrackTableSkeleton,
   validateSearch: search => {
     const { page = 1, size = 10, sort, order, q } = search;
     return {
@@ -120,10 +121,10 @@ function TracksTablePage() {
 
   const { mutate: deleteTrack } = useDeleteTrack({
     onSuccess: () => {
-      toast.success('Track was deleted successfully');
+      toast.success(<p data-testid="toast-success">Track was deleted successfully</p>);
     },
     onError: ({ message }: { message: string }) => {
-      toast.error(message);
+      toast.error(<p data-testid="toast-error">{message}</p>);
     },
   });
 
@@ -148,8 +149,15 @@ function TracksTablePage() {
 
   return (
     <div className="container mx-auto py-10">
+      <h1
+        data-testid="tracks-header"
+        className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0"
+      >
+        Music Management App
+      </h1>
       <div className="flex items-center py-4 justify-between">
         <DebounceInput
+          data-testid="search-input"
           debounceTimeout={300}
           element={Input}
           value={search}
@@ -163,6 +171,7 @@ function TracksTablePage() {
           onClick={() => setAddEditDialogOpen(true)}
           className="cursor-pointer"
           variant="outline"
+          data-testid="create-track-button"
         >
           Add Track
         </Button>

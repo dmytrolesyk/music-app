@@ -29,7 +29,7 @@ const createGradients = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2
   return [gradient, progressGradient];
 };
 
-export function AudioPlayer({ fileName }: { fileName: string }) {
+export function AudioPlayer({ fileName, trackId }: { fileName: string; trackId: string }) {
   const wsRef = useRef<WaveSurfer | null>(null);
 
   const waveformRef = useRef<HTMLDivElement>(null);
@@ -78,6 +78,7 @@ export function AudioPlayer({ fileName }: { fileName: string }) {
 
   return (
     <div
+      data-testid={`audio-player-${trackId}`}
       onPointerMove={e => {
         if (hoverRef.current) {
           hoverRef.current.style.width = `${e.nativeEvent.offsetX}px`;
