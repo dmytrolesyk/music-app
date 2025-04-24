@@ -1,4 +1,4 @@
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, Pencil } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
 import { AudioPlayer } from '@/components/ui/audioplayer/audioplayer';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,23 @@ const SortingButton = ({
   </Button>
 );
 
-export const columns: ColumnDef<TrackI>[] = [
+export const createColumns = ({
+  onEdit,
+}: {
+  onEdit: (track: TrackI) => void;
+}): ColumnDef<TrackI>[] => [
+  {
+    id: 'edit',
+    accessorKey: 'edit',
+    header: () => null,
+    cell: ({ row }) => {
+      return (
+        <Button onClick={() => onEdit(row.original)} variant="ghost" className="cursor-pointer">
+          <Pencil className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
   {
     id: 'title',
     accessorKey: 'title',
@@ -87,7 +103,9 @@ export const columns: ColumnDef<TrackI>[] = [
     header: 'Cover Image',
     cell: ({ row }) => {
       const imageUrl = row.original.coverImage;
-      return imageUrl ? <img width={150} height={150} src={imageUrl} /> : null;
+      return imageUrl ? (
+        <img className="mt-2 max-h-32 rounded" width={150} height={150} src={imageUrl} />
+      ) : null;
     },
   },
   {

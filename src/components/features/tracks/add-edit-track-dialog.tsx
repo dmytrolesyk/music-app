@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { z } from 'zod';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { getGenres, useAddTrack } from '@/lib/api/queries';
+import { getGenres, useAddTrack, getTrack, useEditTrack } from '@/lib/api/queries';
 import { ConfirmDialog } from './confirm-dialog';
 import { TrackSchema } from '@/types/schemas';
 import { GenresTagInput } from './genres-input';
@@ -41,27 +41,46 @@ type AddEditTrackDialogProps = {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   onFormSubmit: () => void;
+  onClose: () => void;
+  trackToEditSlug?: string;
 };
 
-export function AddEditTrackDialog({ open, setOpen, onFormSubmit }: AddEditTrackDialogProps) {
-  const { mutate: addTrack, isPending } = useAddTrack({
-    onSuccess: () => {
-      onFormSubmit();
-    },
-  });
-  const { data: genres = [] } = useSuspenseQuery(getGenres());
+export function AddEditTrackDialog({
+  open,
+  setOpen,
+  onClose,
+  onFormSubmit,
+  trackToEditSlug,
+}: AddEditTrackDialogProps) {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
+  const { data: genres = [] } = useSuspenseQuery(getGenres());
+  const { data: trackToEdit, isLoading: getTrackLoading } = useQuery(getTrack(trackToEditSlug));
+
+  const { mutate: addTrack, isPending: addTrackPending } = useAddTrack({
+    onSuccess: onFormSubmit,
+  });
+
+  const { mutate: editTrack, isPending: editTrackPending } = useEditTrack({
+    onSuccess: onFormSubmit,
+  });
+
   const form = useForm({
-    defaultValues: defaultTrack,
+    defaultValues: trackToEdit ?? defaultTrack,
     validators: {
       onChange: TrackFormSchema,
     },
-    onSubmit: async ({ value: newTrack }) => {
-      addTrack(newTrack);
-      form.reset();
+    onSubmit: ({ value: newTrack }) => {
+      if (trackToEdit) {
+        editTrack({ id: trackToEdit?.id, ...newTrack });
+      } else {
+        addTrack(newTrack);
+      }
+      form.reset(defaultTrack);
     },
   });
+
+  const isLoading = addTrackPending || getTrackLoading || editTrackPending;
 
   return (
     <Dialog
@@ -70,12 +89,16 @@ export function AddEditTrackDialog({ open, setOpen, onFormSubmit }: AddEditTrack
         if (!newOpen && form.state.isDirty) {
           setConfirmDialogOpen(true);
         } else {
+          if (!newOpen) {
+            form.reset(defaultTrack);
+            onClose();
+          }
           setOpen(newOpen);
         }
       }}
     >
       <DialogContent className="sm:max-w-[600px]">
-        <Spinner spinning={isPending}>
+        <Spinner spinning={isLoading}>
           <DialogHeader>
             <DialogTitle>Add Track</DialogTitle>
             <DialogDescription>Fill in all the fields to add the track</DialogDescription>
@@ -146,12 +169,20 @@ export function AddEditTrackDialog({ open, setOpen, onFormSubmit }: AddEditTrack
                       <Label htmlFor="coverImage" className="text-right">
                         Cover Image
                       </Label>
-                      <Input
-                        onChange={e => field.handleChange(e.target.value)}
-                        value={field.state.value}
-                        id="coverImage"
-                        className="col-span-3"
-                      />
+                      <div className="col-span-3">
+                        <Input
+                          onChange={e => field.handleChange(e.target.value)}
+                          value={field.state.value}
+                          id="coverImage"
+                        />
+                        {field.state.value && (
+                          <img
+                            src={field.state.value}
+                            alt="Cover preview"
+                            className="mt-2 max-h-32 rounded col-span-3"
+                          />
+                        )}
+                      </div>
                     </>
                   )}
                 </form.Field>
@@ -176,7 +207,9 @@ export function AddEditTrackDialog({ open, setOpen, onFormSubmit }: AddEditTrack
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button aria-disabled={isLoading} disabled={isLoading} type="submit">
+                Save changes
+              </Button>
             </DialogFooter>
           </form>
         </Spinner>
@@ -185,7 +218,7 @@ export function AddEditTrackDialog({ open, setOpen, onFormSubmit }: AddEditTrack
         open={confirmDialogOpen}
         setOpen={setConfirmDialogOpen}
         onConfirm={() => {
-          form.reset();
+          form.reset(defaultTrack);
           setOpen(false);
         }}
       />

@@ -21,7 +21,7 @@ export const getTracks = (params?: {
 
   return queryOptions({
     queryKey: ['GET_TRACKS', page, limit, sort, order, search],
-    queryFn: async (): Promise<TracksI> => {
+    queryFn: (): Promise<TracksI> => {
       const searchParams = new URLSearchParams(
         removeNullishValues({ page: String(page), limit: String(limit), sort, order, search }),
       );
@@ -32,6 +32,13 @@ export const getTracks = (params?: {
   });
 };
 
+export const getTrack = (trackSlug?: string) =>
+  queryOptions({
+    queryKey: ['GET_TRACK', trackSlug],
+    queryFn: async (): Promise<TrackI | null> =>
+      trackSlug ? getData(apiClient.get(`tracks/${trackSlug}`)) : null,
+  });
+
 export const getGenres = () =>
   queryOptions({
     queryKey: ['GET_GENRES'],
@@ -40,12 +47,27 @@ export const getGenres = () =>
 
 export const useAddTrack = (options: { onSuccess?: () => void; onError?: () => void }) => {
   return useMutation({
-    mutationFn: async (
-      params: Pick<TrackI, 'title' | 'artist' | 'album' | 'genres' | 'coverImage'>,
-    ) => {
+    mutationFn: (params: Pick<TrackI, 'title' | 'artist' | 'album' | 'genres' | 'coverImage'>) => {
       const { title, artist, album, genres, coverImage } = params;
-      await new Promise(r => setTimeout(r, 2000));
-      return await apiClient.post('/tracks', {
+      return apiClient.post('/tracks', {
+        title,
+        artist,
+        album,
+        genres,
+        coverImage,
+      });
+    },
+    ...options,
+  });
+};
+
+export const useEditTrack = (options: { onSuccess?: () => void; onError?: () => void }) => {
+  return useMutation({
+    mutationFn: (
+      params: Pick<TrackI, 'id' | 'title' | 'artist' | 'album' | 'genres' | 'coverImage'>,
+    ) => {
+      const { id, title, artist, album, genres, coverImage } = params;
+      return apiClient.put(`/tracks/${id}`, {
         title,
         artist,
         album,

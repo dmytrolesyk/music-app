@@ -1,16 +1,15 @@
 import { createFileRoute, getRouteApi } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { columns } from '@/components/features/tracks/columns';
+import { createColumns } from '@/components/features/tracks/columns';
 import { DataTable } from '@/components/features/tracks/data-table';
 import { getGenres, getTracks } from '@/lib/api/queries';
 import { PaginationState, SortingState } from '@tanstack/react-table';
-import { SortingOrder } from '@/types/types';
+import { SortingOrder, TrackI } from '@/types/types';
 import { DebounceInput } from 'react-debounce-input';
 import { Input } from '@/components/ui/input';
-// import { Button } from '@/components/ui/button';
 import { AddEditTrackDialog } from '@/components/features/tracks/add-edit-track-dialog';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 type SearchParamsType = {
   page: number;
@@ -94,6 +93,7 @@ const useQueryParamsTableState = () => {
 
 function TracksTablePage() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [trackToEdit, setTrackToEdit] = useState<TrackI | null>(null);
   const {
     page,
     size,
@@ -111,6 +111,17 @@ function TracksTablePage() {
     data: { data, meta },
     refetch: refetchTracks,
   } = useSuspenseQuery(getTracks({ page, limit: size, sort, order, search }));
+
+  const columns = useMemo(
+    () =>
+      createColumns({
+        onEdit: track => {
+          setTrackToEdit(track);
+          setDialogOpen(true);
+        },
+      }),
+    [],
+  );
 
   return (
     <div className="container mx-auto py-10">
@@ -148,9 +159,14 @@ function TracksTablePage() {
       />
       <AddEditTrackDialog
         open={dialogOpen}
+        trackToEditSlug={trackToEdit?.slug}
         setOpen={setDialogOpen}
+        onClose={() => {
+          setTrackToEdit(null);
+        }}
         onFormSubmit={() => {
           setDialogOpen(false);
+          setTrackToEdit(null);
           refetchTracks();
         }}
       />

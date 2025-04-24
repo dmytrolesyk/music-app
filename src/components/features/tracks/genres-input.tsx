@@ -17,31 +17,26 @@ interface GenresTagInputProps {
 }
 
 export const GenresTagInput: React.FC<GenresTagInputProps> = ({ genres, value, onChange }) => {
-  const [selectedGenres, setSelectedGenres] = useState<string[]>(value || []);
   const [selectValue, setSelectValue] = useState<string>('');
 
-  const availableGenres = genres.filter(genre => !selectedGenres.includes(genre));
+  const availableGenres = genres.filter(genre => !value.includes(genre));
 
   const handleAddGenre = (genre: string) => {
-    if (genre && !selectedGenres.includes(genre)) {
-      const newGenres = [...selectedGenres, genre];
-      setSelectedGenres(newGenres);
-      onChange(newGenres);
+    if (genre && !value.includes(genre)) {
+      onChange([...value, genre]);
       setSelectValue('');
     }
   };
 
   const handleRemoveGenre = (genreToRemove: string) => {
-    const newGenres = selectedGenres.filter(genre => genre !== genreToRemove);
-    setSelectedGenres(newGenres);
-    onChange(newGenres);
+    onChange(value.filter(genre => genre !== genreToRemove));
     setSelectValue('');
   };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {selectedGenres.map(genre => (
+        {value.map(genre => (
           <Badge key={genre} className="py-1 px-2 flex items-center gap-1">
             {genre}
             <Button
@@ -60,8 +55,8 @@ export const GenresTagInput: React.FC<GenresTagInputProps> = ({ genres, value, o
 
       <Select
         value={selectValue}
-        onValueChange={value => {
-          handleAddGenre(value);
+        onValueChange={genre => {
+          handleAddGenre(genre);
           setSelectValue('');
         }}
         disabled={availableGenres.length === 0}
