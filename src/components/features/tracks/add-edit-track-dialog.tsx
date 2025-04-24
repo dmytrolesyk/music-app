@@ -19,7 +19,6 @@ import { getGenres, useAddTrack, getTrack, useEditTrack } from '@/lib/network/qu
 import { ConfirmDialog } from './confirm-dialog';
 import { TrackSchema } from '@/types/schemas';
 import { GenresTagInput } from './genres-input';
-import { errorMonitor } from 'stream';
 
 const TrackFormSchema = TrackSchema.pick({
   title: true,
@@ -35,7 +34,7 @@ const defaultTrack: TrackForm = {
   title: '',
   artist: '',
   album: '',
-  coverImage: '',
+  coverImage: undefined,
   genres: [],
 };
 
