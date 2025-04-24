@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import { getGenres, useAddTrack, getTrack, useEditTrack } from '@/lib/network/qu
 import { ConfirmDialog } from './confirm-dialog';
 import { TrackSchema } from '@/types/schemas';
 import { GenresTagInput } from './genres-input';
+import { errorMonitor } from 'stream';
 
 const TrackFormSchema = TrackSchema.pick({
   title: true,
@@ -45,6 +47,10 @@ type AddEditTrackDialogProps = {
   trackToEditSlug?: string;
 };
 
+const onError = ({ message }: { message: string }) => {
+  toast.error(message);
+};
+
 export function AddEditTrackDialog({
   open,
   setOpen,
@@ -58,11 +64,21 @@ export function AddEditTrackDialog({
   const { data: trackToEdit, isLoading: getTrackLoading } = useQuery(getTrack(trackToEditSlug));
 
   const { mutate: addTrack, isPending: addTrackPending } = useAddTrack({
-    onSuccess: onFormSubmit,
+    onSuccess: () => {
+      toast.success('Track was successfully added');
+      form.reset(defaultTrack);
+      onFormSubmit();
+    },
+    onError,
   });
 
   const { mutate: editTrack, isPending: editTrackPending } = useEditTrack({
-    onSuccess: onFormSubmit,
+    onSuccess: () => {
+      toast.success('Track was successfully edited');
+      form.reset(defaultTrack);
+      onFormSubmit();
+    },
+    onError,
   });
 
   const form = useForm({
@@ -76,7 +92,6 @@ export function AddEditTrackDialog({
       } else {
         addTrack(newTrack);
       }
-      form.reset(defaultTrack);
     },
   });
 

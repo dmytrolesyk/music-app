@@ -1,12 +1,14 @@
-import {
-  keepPreviousData,
-  queryOptions,
-  useMutation,
-  UseMutationOptions,
-} from '@tanstack/react-query';
+import { keepPreviousData, queryOptions, useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { apiClient } from './apiClient';
 import { SortingOrder, TrackI, TracksI } from '@/types/types';
 import { removeNullishValues } from '../utils';
+
+type ErrorResponse = { error?: string };
+const DEFAULT_ERROR = 'An error has occurred';
+const formatError = (e: AxiosError<ErrorResponse>) => ({
+  message: e.response?.data?.error ?? DEFAULT_ERROR,
+});
 
 const getData = <T>(promise: Promise<{ data: T }>): Promise<T> => promise.then(res => res?.data);
 
@@ -45,7 +47,13 @@ export const getGenres = () =>
     queryFn: (): Promise<string[]> => getData(apiClient.get('/genres')),
   });
 
-export const useAddTrack = (options: { onSuccess?: () => void; onError?: () => void }) => {
+export const useAddTrack = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: () => void;
+  onError?: (e: { message: string }) => void;
+}) => {
   return useMutation({
     mutationFn: (params: Pick<TrackI, 'title' | 'artist' | 'album' | 'genres' | 'coverImage'>) => {
       const { title, artist, album, genres, coverImage } = params;
@@ -57,11 +65,22 @@ export const useAddTrack = (options: { onSuccess?: () => void; onError?: () => v
         coverImage,
       });
     },
-    ...options,
+    onSuccess,
+    onError: (e: AxiosError<ErrorResponse>) => {
+      if (onError) {
+        onError(formatError(e));
+      }
+    },
   });
 };
 
-export const useEditTrack = (options: { onSuccess?: () => void; onError?: () => void }) => {
+export const useEditTrack = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: () => void;
+  onError?: (e: { message: string }) => void;
+}) => {
   return useMutation({
     mutationFn: (
       params: Pick<TrackI, 'id' | 'title' | 'artist' | 'album' | 'genres' | 'coverImage'>,
@@ -75,6 +94,11 @@ export const useEditTrack = (options: { onSuccess?: () => void; onError?: () => 
         coverImage,
       });
     },
-    ...options,
+    onSuccess,
+    onError: (e: AxiosError<ErrorResponse>) => {
+      if (onError) {
+        onError(formatError(e));
+      }
+    },
   });
 };

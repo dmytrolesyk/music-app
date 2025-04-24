@@ -14,7 +14,7 @@ export const TrackSchema = z.object({
   album: z.string().optional(),
   genres: z.array(z.string().nonempty()),
   slug: z.string().nonempty(),
-  coverImage: z.string().url('Should be valid URL').optional(),
+  coverImage: z.preprocess(val => (val === '' ? undefined : val), z.string().url().optional()),
   audioFile: z.string().optional(),
   createdAt: z.string().datetime().nonempty(),
   updatedAt: z.string().datetime().nonempty(),
