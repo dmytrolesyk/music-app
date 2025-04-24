@@ -9,12 +9,12 @@ export const MetadataSchema = z.object({
 
 export const TrackSchema = z.object({
   id: z.string().nonempty(),
-  title: z.string().nonempty(),
-  artist: z.string().nonempty(),
+  title: z.string().nonempty('Title should not be empty'),
+  artist: z.string().nonempty('Artist should not be empty'),
   album: z.string().optional(),
   genres: z.array(z.string().nonempty()),
   slug: z.string().nonempty(),
-  coverImage: z.string().url().optional(),
+  coverImage: z.string().url('Should be valid URL').optional(),
   audioFile: z.string().optional(),
   createdAt: z.string().datetime().nonempty(),
   updatedAt: z.string().datetime().nonempty(),
