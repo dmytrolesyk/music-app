@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { getGenres, useAddTrack, getTrack, useEditTrack } from '@/lib/api/queries';
+import { getGenres, useAddTrack, getTrack, useEditTrack } from '@/lib/network/queries';
 import { ConfirmDialog } from './confirm-dialog';
 import { TrackSchema } from '@/types/schemas';
 import { GenresTagInput } from './genres-input';

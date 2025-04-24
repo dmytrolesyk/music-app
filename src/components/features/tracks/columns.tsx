@@ -1,6 +1,6 @@
 import { ArrowUpDown, Pencil } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
-import { AudioPlayer } from '@/components/ui/audioplayer/audioplayer';
+import { AudioPlayer } from '@/components/ui/audioplayer';
 import { Button } from '@/components/ui/button';
 import { TrackI } from '@/types/types';
 import { Input } from '@/components/ui/input';
@@ -116,7 +116,7 @@ export const createColumns = ({
       const audioFile = row.original.audioFile;
       return audioFile ? (
         <div className="w-[420px]">
-          <AudioPlayer />
+          <AudioPlayer fileName={audioFile} />
         </div>
       ) : null;
     },

@@ -2,7 +2,7 @@ import { createFileRoute, getRouteApi } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createColumns } from '@/components/features/tracks/columns';
 import { DataTable } from '@/components/features/tracks/data-table';
-import { getGenres, getTracks } from '@/lib/api/queries';
+import { getGenres, getTracks } from '@/lib/network/queries';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 import { SortingOrder, TrackI } from '@/types/types';
 import { DebounceInput } from 'react-debounce-input';

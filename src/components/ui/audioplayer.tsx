@@ -1,3 +1,4 @@
+import { getFileUrl } from '@/lib/network/getFileUrl';
 import { useEffect, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
@@ -28,7 +29,7 @@ const createGradients = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2
   return [gradient, progressGradient];
 };
 
-export function AudioPlayer() {
+export function AudioPlayer({ fileName }: { fileName: string }) {
   const wsRef = useRef<WaveSurfer | null>(null);
 
   const waveformRef = useRef<HTMLDivElement>(null);
@@ -42,30 +43,35 @@ export function AudioPlayer() {
       const ctx = canvas.getContext('2d');
 
       if (ctx) {
-        const [gradient, progressGradient] = createGradients(canvas, ctx);
+        try {
+          const [gradient, progressGradient] = createGradients(canvas, ctx);
 
-        wsRef.current = WaveSurfer.create({
-          container: waveformRef.current,
-          waveColor: gradient,
-          progressColor: progressGradient,
-          barWidth: 2,
-          url: '/aphex_twin.mp3',
-        });
+          wsRef.current = WaveSurfer.create({
+            container: waveformRef.current,
+            waveColor: gradient,
+            progressColor: progressGradient,
+            barWidth: 2,
+            url: getFileUrl(fileName),
+          });
 
-        wsRef.current?.on('interaction', () => {
-          wsRef.current?.playPause();
-        });
+          wsRef.current?.on('interaction', () => {
+            wsRef.current?.playPause();
+          });
 
-        wsRef.current?.on('decode', duration => {
-          if (durationRef.current) {
-            durationRef.current.textContent = formatTime(duration);
-          }
-        });
-        wsRef.current?.on('timeupdate', currentTime => {
-          if (timeRef.current) {
-            timeRef.current.textContent = formatTime(currentTime);
-          }
-        });
+          wsRef.current?.on('decode', duration => {
+            if (durationRef.current) {
+              durationRef.current.textContent = formatTime(duration);
+            }
+          });
+          wsRef.current?.on('timeupdate', currentTime => {
+            if (timeRef.current) {
+              timeRef.current.textContent = formatTime(currentTime);
+            }
+          });
+        } catch (e) {
+          console.log(e);
+          wsRef.current = null;
+        }
       }
     }
   }, []);
@@ -77,7 +83,6 @@ export function AudioPlayer() {
           hoverRef.current.style.width = `${e.nativeEvent.offsetX}px`;
         }
       }}
-      // id="waveform"
       ref={waveformRef}
       className="group relative cursor-pointer"
     >
