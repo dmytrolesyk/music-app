@@ -14,19 +14,23 @@ type ConfirmDialogProps = {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   onConfirm: () => void;
+  message: string;
 };
 
-export function ConfirmDialog({ open, setOpen, onConfirm }: ConfirmDialogProps) {
+export function ConfirmDialog({ open, setOpen, message, onConfirm }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>All the typed values will be reset</AlertDialogDescription>
+          <AlertDialogDescription>{message}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setOpen(false)}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel className="cursor-pointer" onClick={() => setOpen(false)}>
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
+            className="cursor-pointer"
             onClick={() => {
               onConfirm();
               setOpen(false);

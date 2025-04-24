@@ -1,8 +1,8 @@
-import { ArrowUpDown, Pencil } from 'lucide-react';
+import { ArrowUpDown, Pencil, Settings, Trash2 } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
 import { AudioPlayer } from '@/components/ui/audioplayer';
 import { Button } from '@/components/ui/button';
-import { TrackI } from '@/types/types';
+import { TrackData, TrackI } from '@/types/types';
 import { Input } from '@/components/ui/input';
 
 const SortingButton = ({
@@ -20,18 +20,31 @@ const SortingButton = ({
 
 export const createColumns = ({
   onEdit,
+  onConfigure,
+  onDelete,
 }: {
-  onEdit: (track: TrackI) => void;
+  onEdit: (track: TrackData) => void;
+  onConfigure: (track: TrackData) => void;
+  onDelete: (track: TrackData) => void;
 }): ColumnDef<TrackI>[] => [
   {
-    id: 'edit',
-    accessorKey: 'edit',
-    header: () => null,
+    id: 'actions',
+    accessorKey: 'actions',
+    header: () => 'Actions',
     cell: ({ row }) => {
+      const trackData = { id: row.original.id, slug: row.original.slug };
       return (
-        <Button onClick={() => onEdit(row.original)} variant="ghost" className="cursor-pointer">
-          <Pencil className="ml-2 h-4 w-4" />
-        </Button>
+        <>
+          <Button onClick={() => onEdit(trackData)} variant="ghost" className="cursor-pointer">
+            <Pencil className="ml-2 h-4 w-4" />
+          </Button>
+          <Button onClick={() => onConfigure(trackData)} variant="ghost" className="cursor-pointer">
+            <Settings />
+          </Button>
+          <Button onClick={() => onDelete(trackData)} variant="ghost" className="cursor-pointer">
+            <Trash2 />
+          </Button>
+        </>
       );
     },
   },

@@ -43,7 +43,7 @@ type AddEditTrackDialogProps = {
   setOpen: Dispatch<SetStateAction<boolean>>;
   onFormSubmit: () => void;
   onClose: () => void;
-  trackToEditSlug?: string;
+  trackSlug?: string;
 };
 
 const onError = ({ message }: { message: string }) => {
@@ -55,12 +55,14 @@ export function AddEditTrackDialog({
   setOpen,
   onClose,
   onFormSubmit,
-  trackToEditSlug,
+  trackSlug,
 }: AddEditTrackDialogProps) {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   const { data: genres = [] } = useSuspenseQuery(getGenres());
-  const { data: trackToEdit, isLoading: getTrackLoading } = useQuery(getTrack(trackToEditSlug));
+  const { data: trackToEdit, isLoading: getTrackLoading } = useQuery(getTrack(trackSlug));
+
+  const editMode = Boolean(trackToEdit);
 
   const { mutate: addTrack, isPending: addTrackPending } = useAddTrack({
     onSuccess: () => {
@@ -113,9 +115,11 @@ export function AddEditTrackDialog({
     >
       <DialogContent className="sm:max-w-[600px]">
         <Spinner spinning={isLoading}>
-          <DialogHeader>
-            <DialogTitle>Add Track</DialogTitle>
-            <DialogDescription>Fill in all the fields to add the track</DialogDescription>
+          <DialogHeader className="scroll-m-20 text-2xl font-semibold tracking-tight">
+            <DialogTitle>{editMode ? 'Edit' : 'Add'} Track</DialogTitle>
+            <DialogDescription>
+              Fill in all the fields to {editMode ? 'edit' : 'add'} the track
+            </DialogDescription>
           </DialogHeader>
           <form
             onSubmit={e => {
@@ -235,6 +239,7 @@ export function AddEditTrackDialog({
           form.reset(defaultTrack);
           setOpen(false);
         }}
+        message="All the typed values will be reset"
       />
     </Dialog>
   );

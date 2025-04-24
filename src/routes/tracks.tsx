@@ -2,14 +2,17 @@ import { createFileRoute, getRouteApi } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createColumns } from '@/components/features/tracks/columns';
 import { DataTable } from '@/components/features/tracks/data-table';
-import { getGenres, getTracks } from '@/lib/network/queries';
+import { getGenres, getTracks, useDeleteTrack } from '@/lib/network/queries';
 import { PaginationState, SortingState } from '@tanstack/react-table';
-import { SortingOrder, TrackI } from '@/types/types';
+import { SortingOrder, TrackData } from '@/types/types';
 import { DebounceInput } from 'react-debounce-input';
 import { Input } from '@/components/ui/input';
 import { AddEditTrackDialog } from '@/components/features/tracks/add-edit-track-dialog';
 import { Button } from '@/components/ui/button';
 import { useMemo, useState } from 'react';
+import { UploadFileDialog } from '@/components/features/tracks/upload-file-dialog';
+import { ConfirmDialog } from '@/components/features/tracks/confirm-dialog';
+import { toast } from 'sonner';
 
 type SearchParamsType = {
   page: number;
@@ -92,8 +95,11 @@ const useQueryParamsTableState = () => {
 };
 
 function TracksTablePage() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [trackToEdit, setTrackToEdit] = useState<TrackI | null>(null);
+  const [addEditDialogOpen, setAddEditDialogOpen] = useState(false);
+  const [uploadFileDialogOpen, setUploadFileDialogOpen] = useState(false);
+  const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState<TrackData | null>(null);
+
   const {
     page,
     size,
@@ -112,12 +118,29 @@ function TracksTablePage() {
     refetch: refetchTracks,
   } = useSuspenseQuery(getTracks({ page, limit: size, sort, order, search }));
 
+  const { mutate: deleteTrack } = useDeleteTrack({
+    onSuccess: () => {
+      toast.success('Track was deleted successfully');
+    },
+    onError: ({ message }: { message: string }) => {
+      toast.error(message);
+    },
+  });
+
   const columns = useMemo(
     () =>
       createColumns({
         onEdit: track => {
-          setTrackToEdit(track);
-          setDialogOpen(true);
+          setSelectedTrack(track);
+          setAddEditDialogOpen(true);
+        },
+        onConfigure: track => {
+          setSelectedTrack(track);
+          setUploadFileDialogOpen(true);
+        },
+        onDelete: track => {
+          setSelectedTrack(track);
+          setConfirmDeleteDialogOpen(true);
         },
       }),
     [],
@@ -136,7 +159,11 @@ function TracksTablePage() {
           }}
           className="max-w-sm"
         />
-        <Button onClick={() => setDialogOpen(true)} className="cursor-pointer" variant="outline">
+        <Button
+          onClick={() => setAddEditDialogOpen(true)}
+          className="cursor-pointer"
+          variant="outline"
+        >
           Add Track
         </Button>
       </div>
@@ -157,19 +184,47 @@ function TracksTablePage() {
         data={data}
         metaData={meta}
       />
-      <AddEditTrackDialog
-        open={dialogOpen}
-        trackToEditSlug={trackToEdit?.slug}
-        setOpen={setDialogOpen}
-        onClose={() => {
-          setTrackToEdit(null);
-        }}
-        onFormSubmit={() => {
-          setDialogOpen(false);
-          setTrackToEdit(null);
-          refetchTracks();
-        }}
-      />
+      {addEditDialogOpen && (
+        <AddEditTrackDialog
+          open={addEditDialogOpen}
+          trackSlug={selectedTrack?.slug}
+          setOpen={setAddEditDialogOpen}
+          onClose={() => {
+            setSelectedTrack(null);
+          }}
+          onFormSubmit={() => {
+            setAddEditDialogOpen(false);
+            setSelectedTrack(null);
+            refetchTracks();
+          }}
+        />
+      )}
+      {uploadFileDialogOpen && (
+        <UploadFileDialog
+          trackSlug={selectedTrack?.slug}
+          open={uploadFileDialogOpen}
+          setOpen={setUploadFileDialogOpen}
+          onFormSubmit={() => {
+            setUploadFileDialogOpen(false);
+            setSelectedTrack(null);
+            refetchTracks();
+          }}
+        />
+      )}
+      {confirmDeleteDialogOpen && (
+        <ConfirmDialog
+          open={confirmDeleteDialogOpen}
+          setOpen={setConfirmDeleteDialogOpen}
+          message="Track(s) will be deleted permanently"
+          onConfirm={() => {
+            if (selectedTrack?.id) {
+              deleteTrack(selectedTrack?.id);
+              refetchTracks();
+            }
+            setConfirmDeleteDialogOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
