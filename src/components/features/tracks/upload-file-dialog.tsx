@@ -11,6 +11,8 @@ import {
 import { getTrack, useRemoveFile, useUploadFile } from '@/lib/network/queries';
 import { AudioFileUploadInput } from '@/components/ui/audio-upload';
 import { Spinner } from '@/components/ui/spinner';
+import { AudioPlayer } from '@/components/ui/audioplayer';
+import { ConfirmDialog } from './confirm-dialog';
 
 type UploadFileDialogProps = {
   open: boolean;
@@ -26,40 +28,29 @@ export function UploadFileDialog({
   onFormSubmit,
 }: UploadFileDialogProps) {
   const [file, setFile] = useState<File | null>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const { data: trackToEdit, isLoading } = useQuery(getTrack(trackSlug));
-  const { mutate: uploadFile, isPending: isUploading } = useUploadFile({
+  const { mutate: upload, isPending: isUploading } = useUploadFile({
     onSuccess: () => {
       onFormSubmit();
     },
   });
 
-  const { mutate: removeAudio, isPending: isRemoving } = useRemoveFile({
+  const { mutate: remove, isPending: isRemoving } = useRemoveFile({
     onSuccess: () => {
       onFormSubmit();
     },
   });
 
-  const [shouldRemoveExisting, setShouldRemoveExisting] = useState(false);
-
-  const handleFileChange = (newFile: File | null) => {
-    setFile(newFile);
-
-    if (!newFile && trackToEdit?.audioFile) {
-      setShouldRemoveExisting(true);
-    } else {
-      setShouldRemoveExisting(false);
+  const uploadFile = () => {
+    if (trackToEdit && file) {
+      upload({ trackId: trackToEdit?.id, file });
     }
   };
 
-  const handleSave = () => {
-    if (!trackToEdit) return;
-
-    if (file) {
-      uploadFile({ trackId: trackToEdit.id, file });
-    } else if (shouldRemoveExisting) {
-      removeAudio(trackToEdit.id);
-    } else {
-      setOpen(false);
+  const removeFile = () => {
+    if (trackToEdit) {
+      remove(trackToEdit?.id);
     }
   };
 
@@ -97,14 +88,39 @@ export function UploadFileDialog({
               )}
             </div>
           </dl>
-          <AudioFileUploadInput onChange={handleFileChange} />
+          {trackToEdit?.audioFile ? (
+            <div className="py-4">
+              <AudioPlayer fileName={trackToEdit.audioFile} />
+            </div>
+          ) : (
+            <AudioFileUploadInput onChange={f => setFile(f)} />
+          )}
           <DialogFooter>
-            <Button onClick={handleSave} disabled={isLoading || isProcessing} type="submit">
-              Save Changes
+            <Button
+              onClick={() => {
+                if (trackToEdit?.audioFile) {
+                  setConfirmDialogOpen(true);
+                } else if (file) {
+                  uploadFile();
+                }
+              }}
+              disabled={isLoading || isProcessing || (!file && !trackToEdit?.audioFile)}
+              type="submit"
+            >
+              {trackToEdit?.audioFile ? 'Delete file' : 'Upload file'}
             </Button>
           </DialogFooter>
         </Spinner>
       </DialogContent>
+      <ConfirmDialog
+        open={confirmDialogOpen}
+        setOpen={setConfirmDialogOpen}
+        onConfirm={() => {
+          removeFile();
+          setOpen(false);
+        }}
+        message="Audio file will be deleted (you'll be able to upload a new one though)"
+      />
     </Dialog>
   );
 }
