@@ -14,6 +14,7 @@ import { UploadFileDialog } from '@/components/features/tracks/upload-file-dialo
 import { ConfirmDialog } from '@/components/features/tracks/confirm-dialog';
 import { toast } from 'sonner';
 import { TrackTableSkeleton } from '@/components/features/tracks/tracks-table-skeleton';
+import { NoteFromDev } from '@/components/misc/note-from-dev';
 
 type SearchParamsType = {
   page: number;
@@ -151,10 +152,11 @@ function TracksTablePage() {
     <div className="container mx-auto py-10">
       <h1
         data-testid="tracks-header"
-        className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0"
+        className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mb-2"
       >
         Music Management App
       </h1>
+      <NoteFromDev />
       <div className="flex items-center py-4 justify-between">
         <DebounceInput
           data-testid="search-input"
